@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyCast | Weather Dashboard</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <div id="weather-effects" class="weather-effects" aria-hidden="true"></div>
+
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <a href="#" class="brand">
+        <span class="brand-icon">☀</span>
+        <span>SkyCast</span>
+      </a>
+
+      <p class="menu-label">MENU</p>
+
+      <nav class="navigation">
+        <a href="#current-weather" class="nav-link active">☁️ <span>Weather</span></a>
+        <a href="#hourly-section" class="nav-link">🕒 <span>Hourly Forecast</span></a>
+        <a href="#forecast-section" class="nav-link">📅 <span>7-Day Forecast</span></a>
+        <a href="#highlights-section" class="nav-link">📊 <span>Highlights</span></a>
+        <a href="#air-quality-section" class="nav-link">🌿 <span>Air &amp; alerts</span></a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-weather">🌤️</div>
+        <h3>Weather updates</h3>
+        <p>Check the weather before planning your day.</p>
+        <a href="#current-weather" class="sidebar-button">View Weather</a>
+      </div>
+
+      <p class="sidebar-footer">Powered by Open-Meteo</p>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Header -->
+      <header class="topbar">
+
+        <div>
+          <p class="eyebrow">WEATHER OVERVIEW</p>
+          <h1>Good day! <span class="wave">👋</span></h1>
+          <p class="subheading">Here's what's happening with the weather.</p>
+        </div>
+
+        <div class="topbar-actions">
+
+          <button type="button" id="unit-toggle" class="theme-toggle" aria-label="Switch temperature unit">
+            °C
+          </button>
+
+          <button type="button" id="refresh-btn" class="theme-toggle" aria-label="Refresh weather">
+            ↻ Refresh
+          </button>
+
+          <button
+            type="button"
+            id="theme-toggle"
+            class="theme-toggle"
+            aria-label="Switch color theme"
+          >
+            ☀️ Light Mode
+          </button>
+
+          <div class="topbar-badge">
+            <span class="live-dot"></span>
+            Live Weather
+          </div>
+
+        </div>
+
+      </header>
+
+      <!-- City Search -->
+      <form id="search-form" class="search-form">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          id="city-input"
+          placeholder="Search city, e.g. Mumbai"
+          value="Ahmedabad"
+          autocomplete="off"
+          required
+        >
+
+        <button type="submit" id="search-btn">Search</button>
+
+      </form>
+
+      <button type="button" id="location-btn" class="location-btn">
+        📍 Use My Location
+      </button>
+
+      <section id="exact-location" class="exact-location" aria-live="polite" hidden>
+        <div class="exact-location-pin" aria-hidden="true">⌖</div>
+        <div class="exact-location-details">
+          <p class="exact-location-label">YOUR DEVICE LOCATION</p>
+          <p id="place-name" class="exact-location-place">Finding nearby place...</p>
+          <p id="coordinates" class="exact-location-coordinates">--, --</p>
+          <p id="location-accuracy" class="exact-location-accuracy"></p>
+          <p class="exact-location-privacy">GPS coordinates are shared with OpenStreetMap to find this place.</p>
+        </div>
+        <div class="location-links">
+          <a
+            id="map-link"
+            class="location-map-link"
+            href="https://www.openstreetmap.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Open in OpenStreetMap ↗</a>
+          <a
+            class="location-attribution"
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noopener noreferrer"
+          >© OpenStreetMap</a>
+        </div>
+      </section>
+
+      <div class="saved-places">
+        <button type="button" id="favorite-toggle" class="location-btn" aria-pressed="false">
+          ☆ Save city
+        </button>
+        <div id="favorite-list" class="favorite-list" aria-label="Saved cities"></div>
+        <button type="button" id="compare-cities-btn" class="location-btn">
+          ⇄ Compare saved cities
+        </button>
+      </div>
+
+      <section id="comparison-section" class="comparison-section" aria-live="polite" hidden>
+        <div class="comparison-heading">
+          <h2>Saved city comparison</h2>
+          <button type="button" id="close-comparison" class="comparison-close" aria-label="Close comparison">×</button>
+        </div>
+        <div id="comparison-list" class="comparison-list"></div>
+      </section>
+
+      <p id="status" class="status" role="status">Loading weather...</p>
+
+      <!-- Current Weather -->
+      <section id="current-weather" class="hero-card">
+
+        <div class="hero-content">
+
+          <p class="eyebrow hero-eyebrow">CURRENT WEATHER</p>
+
+          <h2 id="city-name">Ahmedabad</h2>
+
+          <p id="current-date" class="hero-date">Loading date...</p>
+
+          <div class="temperature-row">
+            <span id="temperature" class="temperature">--°</span>
+            <div class="weather-symbol" id="weather-icon">🌤️</div>
+          </div>
+
+          <p id="weather-description" class="weather-description">Loading...</p>
+
+          <p class="feels-line">
+            Feels like <strong id="feels-like">--°C</strong>
+          </p>
+
+        </div>
+
+        <div class="hero-side">
+          <div class="sun-decoration">☀️</div>
+          <p class="hero-side-label">TODAY'S CONDITIONS</p>
+          <h3 id="day-status">--</h3>
+          <p>Stay updated with real-time weather conditions.</p>
+        </div>
+
+      </section>
+
+      <!-- Highlights -->
+      <section id="highlights-section" class="section-block">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">WEATHER DETAILS</p>
+            <h2>Today's Highlights</h2>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Humidity</span>
+              <span class="stat-icon">💧</span>
+            </div>
+            <h3 id="humidity">--%</h3>
+            <p>Relative humidity</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Wind Speed</span>
+              <span class="stat-icon">💨</span>
+            </div>
+            <h3 id="wind">-- km/h</h3>
+            <p>Current wind speed</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Wind Direction</span>
+              <span class="stat-icon">🧭</span>
+            </div>
+            <h3 id="wind-direction">--</h3>
+            <p id="wind-bearing">Direction from north</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>UV Index</span>
+              <span class="stat-icon">☀️</span>
+            </div>
+            <h3 id="uv">--</h3>
+            <p id="uv-label">UV level</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Rain Chance</span>
+              <span class="stat-icon">🌧️</span>
+            </div>
+            <h3 id="rain">--%</h3>
+            <p>Maximum chance today</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Air Pressure</span>
+              <span class="stat-icon">◉</span>
+            </div>
+            <h3 id="pressure">-- hPa</h3>
+            <p>Sea-level atmospheric pressure</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Visibility</span>
+              <span class="stat-icon">👁️</span>
+            </div>
+            <h3 id="visibility">-- km</h3>
+            <p>Estimated viewing distance</p>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Dew Point</span>
+              <span class="stat-icon">💧</span>
+            </div>
+            <h3 id="dew-point">--°</h3>
+            <p>Temperature at which moisture condenses</p>
+          </article>
+
+        </div>
+
+      </section>
+
+      <section id="air-quality-section" class="section-block">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">AIR &amp; DAILY PLANS</p>
+            <h2>Air quality &amp; weather heads-up</h2>
+          </div>
+        </div>
+
+        <div class="extras-grid">
+          <article id="air-quality-card" class="extra-card air-quality-card">
+            <div class="extra-card-heading">
+              <div>
+                <p class="eyebrow">CURRENT AIR QUALITY</p>
+                <h3 id="air-quality-label">Loading air quality...</h3>
+              </div>
+              <span class="extra-card-icon" aria-hidden="true">🌿</span>
+            </div>
+            <p id="air-quality-value" class="extra-card-value">AQI --</p>
+            <p id="air-quality-details" class="extra-card-copy">Fetching nearby air-quality readings.</p>
+            <p class="extra-card-source">Open-Meteo air-quality data · US AQI scale</p>
+          </article>
+
+          <article class="extra-card outfit-card">
+            <div class="extra-card-heading">
+              <div>
+                <p class="eyebrow">PLAN YOUR DAY</p>
+                <h3>What to wear</h3>
+              </div>
+              <span class="extra-card-icon" aria-hidden="true">🧥</span>
+            </div>
+            <p id="outfit-suggestion" class="extra-card-copy">Your clothing suggestion will appear with the forecast.</p>
+          </article>
+
+          <article class="extra-card alerts-card">
+            <div class="extra-card-heading">
+              <div>
+                <p class="eyebrow">FORECAST-BASED</p>
+                <h3>Weather heads-up</h3>
+              </div>
+              <span class="extra-card-icon" aria-hidden="true">⚠️</span>
+            </div>
+            <ul id="weather-alerts" class="weather-alert-list">
+              <li>Checking today's forecast...</li>
+            </ul>
+            <p class="extra-card-source">Informational forecast tips, not official emergency alerts.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Temperature Chart -->
+      <section id="chart-section" class="section-block">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">TEMPERATURE TREND</p>
+            <h2>Today's Temperature</h2>
+          </div>
+          <span class="small-badge">Next 24 hours</span>
+        </div>
+
+        <article class="chart-card">
+
+          <div class="chart-legend">
+            <span class="legend-dot"></span>
+            Temperature (<span id="chart-unit">°C</span>)
+          </div>
+
+          <div class="chart-wrapper">
+            <canvas id="tempChart"></canvas>
+          </div>
+
+          <p id="chart-status" class="chart-status">
+            Loading temperature chart...
+          </p>
+
+        </article>
+
+      </section>
+
+      <!-- Hourly Forecast -->
+      <section id="hourly-section" class="section-block">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">HOUR BY HOUR</p>
+            <h2>Hourly Forecast</h2>
+          </div>
+          <div class="forecast-controls">
+            <label class="forecast-hours-control" for="forecast-hours">
+              Show
+              <select id="forecast-hours" aria-label="Hourly forecast length">
+                <option value="6">6 hours</option>
+                <option value="12">12 hours</option>
+                <option value="24">24 hours</option>
+              </select>
+            </label>
+            <button type="button" id="clock-toggle" class="theme-toggle" aria-label="Switch to 24-hour time">
+              12-hour
+            </button>
+            <button type="button" id="rain-chance-toggle" class="theme-toggle" aria-pressed="false">
+              💧 Rain chance
+            </button>
+          </div>
+        </div>
+
+        <div id="hourly-list" class="hourly-list">
+          <p class="empty-message">Loading hourly forecast...</p>
+        </div>
+
+      </section>
+
+      <!-- 7-Day Forecast -->
+      <section id="forecast-section" class="section-block">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PLAN AHEAD</p>
+            <h2>7-Day Forecast</h2>
+          </div>
+        </div>
+
+        <article class="forecast-card">
+          <div id="forecast-list" class="forecast-list">
+            <p class="empty-message">Loading 7-day forecast...</p>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- Sunrise and Sunset -->
+      <section id="sun-section" class="section-block">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DAYLIGHT</p>
+            <h2>Sunrise &amp; Sunset</h2>
+          </div>
+        </div>
+
+        <div class="sun-grid">
+
+          <article class="sun-card sunrise-card">
+            <div class="sun-icon">🌅</div>
+            <div>
+              <p>Sunrise</p>
+              <h3 id="sunrise">--:--</h3>
+            </div>
+          </article>
+
+          <article class="sun-card sunset-card">
+            <div class="sun-icon">🌇</div>
+            <div>
+              <p>Sunset</p>
+              <h3 id="sunset">--:--</h3>
+            </div>
+          </article>
+
+        </div>
+
+        <article class="daylight-card">
+          <div class="daylight-copy">
+            <span>Daylight today</span>
+            <strong id="daylight-remaining">Calculating daylight...</strong>
+          </div>
+          <div
+            id="daylight-progress"
+            class="daylight-progress"
+            role="progressbar"
+            aria-label="Daylight elapsed"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <span id="daylight-progress-fill"></span>
+          </div>
+          <p id="daylight-progress-label" class="daylight-progress-label">Daylight progress unavailable</p>
+        </article>
+
+      </section>
+
+      <!-- Footer -->
+      <footer class="page-footer">
+        <p>SkyCast © 2026 · Weather data by Open-Meteo</p>
+        <p>Made for your everyday forecast ☁️</p>
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
